@@ -10,49 +10,49 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id         Int      @id @default(autoincrement())
-  name       String
-  penName    String
-  email      String   @unique
-  isDisabled Boolean  @default(true)
-  hash       String
-  hashedRt   String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+model Author {
+  Author_ID    Int      @id @default(autoincrement())
+  Name         String
+  Pen_Name     String
+  Email        String   @unique
+  Is_Disabled  Boolean  @default(true)
+  Hash         String
+  Hashed_RT    String?
+  Created_Time DateTime @default(now())
+  Updated_Time DateTime @updatedAt
 
   Book  Book[]
   Sales Sales[]
-  @@map("users")
+  // @@map("author")
 }
 
 model Book {
-  id        Int      @id @default(autoincrement())
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
-  title     String
-  summary   String?
-  stock     Int
-  price     Int
-  coverUrl  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  Book_ID      Int      @id @default(autoincrement())
+  Author       Author   @relation(fields: [Author_ID], references: [Author_ID])
+  Author_ID    Int
+  Title        String
+  Summary      String?
+  Stock        Int
+  Price        Int
+  Cover_URL    String?
+  Created_Time DateTime @default(now())
+  Updated_Time DateTime @updatedAt
 
-  @@map("book")
+  // @@map("book")
 }
 
 model Sales {
-  id             Int      @id @default(autoincrement())
-  author         User     @relation(fields: [authorId], references: [id])
-  authorId       Int
-  recipientName  String
-  recipientEmail String
-  bookTitle      String
-  quantity       Int
-  pricePerUnit   Int
-  priceTotal     Int
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  Sales_ID        Int      @id @default(autoincrement())
+  Author          Author   @relation(fields: [Author_ID], references: [Author_ID])
+  Author_ID       Int
+  Recipient_Name  String
+  Recipient_Email String
+  Book_Title      String
+  Quantity        Int
+  Price_Per_Unit  Int
+  Price_Total     Int
+  Created_Time    DateTime @default(now())
+  Updated_Time    DateTime @updatedAt
 
-  @@map("sales")
+  // @@map("Sales")
 }
