@@ -11,14 +11,48 @@ datasource db {
 }
 
 model User {
-  id  Int @id @default(autoincrement())
-  name  String
-  pen_name String
-  email String  @unique
-  hash  String
-  hashedRt  String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  
+  id         Int      @id @default(autoincrement())
+  name       String
+  penName    String
+  email      String   @unique
+  isDisabled Boolean  @default(true)
+  hash       String
+  hashedRt   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  Book  Book[]
+  Sales Sales[]
   @@map("users")
+}
+
+model Book {
+  id        Int      @id @default(autoincrement())
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+  title     String
+  summary   String?
+  stock     Int
+  price     Int
+  coverUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("book")
+}
+
+model Sales {
+  id             Int      @id @default(autoincrement())
+  author         User     @relation(fields: [authorId], references: [id])
+  authorId       Int
+  recipientName  String
+  recipientEmail String
+  bookTitle      String
+  quantity       Int
+  pricePerUnit   Int
+  priceTotal     Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("sales")
 }
