@@ -1,13 +1,13 @@
-import { IsEmail, IsInt, IsNotEmpty, IsString } from "class-validator";
+import { IsEmail, IsInt, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class AllBooksDto {
-  @IsInt()
+  @IsNotEmpty()
   Page: number;
 
-  @IsInt()
+  @IsNotEmpty()
   Limit: number;
 
-  @IsString()
+  @IsOptional()
   Title: string;
 
   @IsInt()

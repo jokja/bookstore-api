@@ -4,18 +4,51 @@ import { PrismaService } from "src/prisma/prisma.service";
 @Injectable()
 export class BookService {
   constructor(private prisma: PrismaService){}
-  async getAllBooks(query){
-    console.log(query.Page)
+  async getAllBooks(page: number, limit: number, title: string, authorId: number){
     const results = await this.prisma.book.findMany({
-      skip: (parseInt(query.Page) - 1) * parseInt(query.Limit),
-      take: parseInt(query.Limit),
+      skip: (page - 1) * limit,
+      take: limit,
       where: {
-        title: query.Title,
-        authorId: query.Author_ID
+        Title: title,
+        Author_ID: authorId
+      },
+      include: {
+        Author: {
+          select: {
+            Pen_Name: true
+          }
+        }
       }
     })
-    console.log('result', results)
-    return results
+    const data = {
+      List_Data: results.map(v => {
+        v['Author_Pen_Name'] = v.Author.Pen_Name
+        return v
+      }),
+      Pagination_Data: {
+        Current_Page: page,
+        Max_Data_Per_Page: limit,
+        // Max_Page: 1,
+        // Total_All_Data: 2
+      }
+    }
+    return data
   }
-  getBook(){}
+  async getBook(BookId: number){
+    const result = await this.prisma.book.findUnique({
+      where: {
+        Book_ID: BookId
+      },
+      include: {
+        Author: {
+          select: {
+            Pen_Name: true
+          }
+        }
+      }
+    })
+    result['Author_Pen_Name'] = result.Author.Pen_Name
+    delete result['Author']
+    return result
+  }
 }
