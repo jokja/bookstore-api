@@ -34,7 +34,7 @@ export class AuthService {
           email,
         }, {
           secret: 'rt-secret',
-          expiresIn: 60 * 60 * 24 * 7
+          expiresIn: 60 * 60 * 24
         }
       )
     ])
@@ -47,20 +47,20 @@ export class AuthService {
 
   async updateRtHash(userId: number, rt: string) {
     const hash = await this.hashData(rt)
-    await this.prisma.user.update({
+    await this.prisma.author.update({
       where: {
-        id: userId
+        Author_ID: userId
       },
       data: {
-        hashedRt: hash
+        Hashed_RT: hash
       }
     })
   }
 
   async login(dto: AuthDto): Promise<Tokens> {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.author.findUnique({
       where: {
-        email: dto.Email
+        Email: dto.Email
       }
     })
 
@@ -68,14 +68,14 @@ export class AuthService {
       message: 'Email tidak ditemukan di data Author',
       error_key: 'error_invalid_password'
     }, 200)
-    const passwordMatches = await bcrypt.compare(dto.Password, user.hash)
+    const passwordMatches = await bcrypt.compare(dto.Password, user.Hash)
     if (!passwordMatches) throw new HttpException({
       message: 'Password tidak sesuai',
       error_key: 'error_email_not_found'
     }, 200)
 
-    const tokens = await this.getTokens(user.id, user.email)
-    await this.updateRtHash(user.id, tokens.refresh_token)
+    const tokens = await this.getTokens(user.Author_ID, user.Email)
+    await this.updateRtHash(user.Author_ID, tokens.refresh_token)
     return tokens
   }
 
@@ -85,9 +85,9 @@ export class AuthService {
 
   async register(dto: RegisterDto): Promise<User> {
     const hash = await this.hashData(dto.Password)
-    const email = await this.prisma.user.findUnique({
+    const email = await this.prisma.author.findUnique({
       where: {
-        email: dto.Email
+        Email: dto.Email
       }
     })
     if (email) {
@@ -96,20 +96,20 @@ export class AuthService {
         error_key: 'error_email_duplicate'
       }, 200)
     }
-    const newUser = await this.prisma.user.create({
+    const newUser = await this.prisma.author.create({
       data: {
-        name: dto.Name,
-        penName: dto.Pen_name,
-        email: dto.Email,
-        hash
+        Name: dto.Name,
+        Pen_Name: dto.Pen_name,
+        Email: dto.Email,
+        Hash: hash
       }
     })
-    const tokens = await this.getTokens(newUser.id, newUser.email)
-    await this.updateRtHash(newUser.id, tokens.refresh_token)
+    const tokens = await this.getTokens(newUser.Author_ID, newUser.Email)
+    await this.updateRtHash(newUser.Author_ID, tokens.refresh_token)
     return {
-      name: newUser.name,
-      pen_name: newUser.penName,
-      email: newUser.email
+      name: newUser.Name,
+      pen_name: newUser.Pen_Name,
+      email: newUser.Email
     }
   }
 
