@@ -99,7 +99,7 @@ export class AuthService {
     const newUser = await this.prisma.user.create({
       data: {
         name: dto.Name,
-        pen_name: dto.Pen_name,
+        penName: dto.Pen_name,
         email: dto.Email,
         hash
       }
@@ -108,7 +108,7 @@ export class AuthService {
     await this.updateRtHash(newUser.id, tokens.refresh_token)
     return {
       name: newUser.name,
-      pen_name: newUser.pen_name,
+      pen_name: newUser.penName,
       email: newUser.email
     }
   }
