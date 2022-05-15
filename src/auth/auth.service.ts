@@ -2,7 +2,7 @@ import { ForbiddenException, HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto, RegisterDto } from './dto';
 import * as bcrypt from 'bcrypt'
-import { Tokens, User } from './types';
+import { MyProfile, Tokens, User } from './types';
 import { JwtService } from '@nestjs/jwt'
 
 @Injectable()
@@ -165,4 +165,32 @@ export class AuthService {
   update() {}
 
   delete() {}
+
+  async getMyProfile(authorId: number): Promise<MyProfile> {
+    if (!authorId) {
+      throw new HttpException({
+        message: 'Token access pada Header tidak sesuai ketentuan / settingan token',
+        error_key: 'error_invalid_token'
+      }, 200)
+    }
+    const user = await this.prisma.author.findUnique({
+      where: {
+        Author_ID: authorId
+      }
+    })
+
+    if(!user) {
+      throw new HttpException({
+        message: 'Author ID tidak di temukan',
+        error_key: 'error_author_id_not_found'
+      }, 200)
+    }
+
+    return {
+      Author_ID: user.Author_ID,
+      Name: user.Name,
+      Pen_Name: user.Pen_Name,
+      Email: user.Email
+    }
+  }
 }

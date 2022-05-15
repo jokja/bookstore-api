@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, HttpCode, HttpStatus, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Patch, Post } from '@nestjs/common';
 import { GetCurrentUserId, Public } from 'src/common/decorators';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
@@ -50,5 +50,10 @@ export class AuthController {
   @Delete('delete')
   delete() {
     this.authSerivce.delete();
+  }
+
+  @Get('get_my_profile')
+  getMyProfile(@GetCurrentUserId() authorId: number) {
+    return this.authSerivce.getMyProfile(authorId);
   }
 }
