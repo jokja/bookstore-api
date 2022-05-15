@@ -1,5 +1,7 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
+import { AddBookDto } from "./dto/addBook.dto";
+import { UpdateBookDto } from "./dto/updateBook.dto";
 
 @Injectable()
 export class BookService {
@@ -96,5 +98,61 @@ export class BookService {
     }
 
     return results
+  }
+
+  addBook(dto: AddBookDto, authorId: number) {
+    const coverUrl = null
+    const book = this.prisma.book.create({
+      data: {
+        Author_ID: authorId,
+        Title: dto.Title,
+        Summary: dto.Summary,
+        Price: dto.Price,
+        Stock: dto.Stock,
+        Cover_URL: coverUrl,
+      }
+    })
+
+    return book
+  }
+
+  async updateBook(dto: UpdateBookDto, bookId: number) {
+    await this.checkId(bookId)
+    const book = await this.prisma.book.update({
+      where: {
+        Book_ID: bookId
+      },
+      data: {
+        Title: dto.Title,
+        Summary: dto.Summary,
+        Price: dto.Price,
+        Stock: dto.Stock
+      }
+    })
+    return book
+  }
+
+  async deleteBook(bookId: number) {
+    await this.checkId(bookId)
+    await this.prisma.book.delete({
+      where: {
+        Book_ID: bookId
+      }
+    })
+    return
+  }
+
+  async checkId(bookId: number) {
+    const check = await this.prisma.book.findUnique({
+      where: {
+        Book_ID: bookId
+      }
+    })
+    if(!check) {
+      throw new HttpException({
+        message: 'Error ID yang di supply tidak ada di database',
+        error_key: 'error_id_not_found'
+      }, 200)
+    }
   }
 }

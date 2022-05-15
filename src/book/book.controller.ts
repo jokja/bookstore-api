@@ -1,6 +1,8 @@
-import { Controller, Get, Param, ParseIntPipe, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query } from "@nestjs/common";
 import { GetCurrentUserId, Public } from "src/common/decorators";
 import { BookService } from "./book.service";
+import { AddBookDto } from "./dto/addBook.dto";
+import { UpdateBookDto } from "./dto/updateBook.dto";
 
 @Controller('book')
 export class BookController {
@@ -31,6 +33,24 @@ export class BookController {
     @GetCurrentUserId() authorId: number
   ) {
     return this.bookService.getMyBook(page, limit, title, authorId)
+  }
+
+  @Post('add')
+  addBook(@Body() dto: AddBookDto, @GetCurrentUserId() authorId: number) {
+    return this.bookService.addBook(dto, authorId)
+  }
+
+  @Put('update/:id')
+  updateBook(
+    @Body() dto: UpdateBookDto,
+    @Param('id', ParseIntPipe) bookId: number,
+  ) {
+    return this.bookService.updateBook(dto, bookId)
+  }
+
+  @Delete('delete/:id')
+  deleteBook(@Param('id', ParseIntPipe) bookId: number) {
+    return this.bookService.deleteBook(bookId)
   }
 
 }
