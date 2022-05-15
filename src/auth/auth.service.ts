@@ -4,6 +4,7 @@ import { AuthDto, RegisterDto } from './dto';
 import * as bcrypt from 'bcrypt'
 import { MyProfile, Tokens, User } from './types';
 import { JwtService } from '@nestjs/jwt'
+import { EmailDto } from './dto/email.dto';
 
 @Injectable()
 export class AuthService {
@@ -92,7 +93,36 @@ export class AuthService {
     })
   }
 
-  forgotPassword() {}
+  async forgotPassword(dto: EmailDto) {
+    const author = await this.prisma.author.findUnique({
+      where: {
+        Email: dto.Email
+      }
+    })
+    if(!author) {
+      throw new HttpException({
+        message: 'Email tidak ditemukan di data Author',
+        error_key: 'error_email_not_found'
+      }, 200)
+    }
+
+    const newPassword = '123qwe'
+    const hash = await this.hashData(newPassword)
+    await this.prisma.author.update({
+      where: {
+        Email: dto.Email
+      },
+      data: {
+        Hash: hash
+      }
+    })
+    const tokens = await this.getTokens(author.Author_ID, author.Email)
+    await this.updateRtHash(author.Author_ID, tokens.Refresh_Token)
+    return {
+      // New_Password: Math.random().toString(36).slice(-8)
+      New_Password: newPassword
+    }
+  }
 
   async register(dto: RegisterDto): Promise<User> {
     const hash = await this.hashData(dto.Password)
@@ -118,9 +148,9 @@ export class AuthService {
     const tokens = await this.getTokens(newUser.Author_ID, newUser.Email)
     await this.updateRtHash(newUser.Author_ID, tokens.Refresh_Token)
     return {
-      name: newUser.Name,
-      pen_name: newUser.Pen_Name,
-      email: newUser.Email
+      Name: newUser.Name,
+      Pen_Name: newUser.Pen_Name,
+      Email: newUser.Email
     }
   }
 

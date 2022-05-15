@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Patch, Post } from
 import { GetCurrentUserId, Public } from 'src/common/decorators';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
+import { EmailDto } from './dto/email.dto';
 import { RegisterDto } from './dto/register.dto';
 import { Tokens } from './types';
 
@@ -21,9 +22,10 @@ export class AuthController {
     this.authSerivce.logout(authorId);
   }
 
+  @Public()
   @Post('forgot_password')
-  forgotPassword() {
-    this.authSerivce.forgotPassword();
+  forgotPassword(@Body() dto: EmailDto) {
+    return this.authSerivce.forgotPassword(dto);
   }
 
   @Public()
