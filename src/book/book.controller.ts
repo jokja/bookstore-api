@@ -1,11 +1,13 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from "@nestjs/common";
+import { Public } from "src/common/decorators";
 import { BookService } from "./book.service";
-// import { AllBooksDto } from "./dto";
 
 @Controller('book')
 export class BookController {
   constructor(private bookService: BookService){}
-  @Get('/get')
+
+  @Public()
+  @Get('get')
   getAllBooks(
     @Query('Page', ParseIntPipe) page: number,
     @Query('Limit', ParseIntPipe) limit: number,
@@ -15,9 +17,19 @@ export class BookController {
     return this.bookService.getAllBooks(page, limit, title, authorId ? parseInt(authorId) : authorId)
   }
 
-  @Get('/get/:id')
+  @Public()
+  @Get('get/:id')
   getBook(@Param('id', ParseIntPipe) BookId: number){
     return this.bookService.getBook(BookId)
+  }
+
+  @Get('get_my_book')
+  getMyBook(
+    @Query('Page', ParseIntPipe) page: number,
+    @Query('Limit', ParseIntPipe) limit: number,
+    @Query('Title') title: string,
+  ) {
+    return this.bookService.getMyBook(page, limit, title)
   }
 
 }
