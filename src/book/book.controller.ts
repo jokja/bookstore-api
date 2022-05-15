@@ -1,5 +1,5 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from "@nestjs/common";
-import { Public } from "src/common/decorators";
+import { GetCurrentUserId, Public } from "src/common/decorators";
 import { BookService } from "./book.service";
 
 @Controller('book')
@@ -28,8 +28,9 @@ export class BookController {
     @Query('Page', ParseIntPipe) page: number,
     @Query('Limit', ParseIntPipe) limit: number,
     @Query('Title') title: string,
+    @GetCurrentUserId() authorId: number
   ) {
-    return this.bookService.getMyBook(page, limit, title)
+    return this.bookService.getMyBook(page, limit, title, authorId)
   }
 
 }
