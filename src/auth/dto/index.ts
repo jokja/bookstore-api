@@ -1,2 +1,6 @@
 export * from './auth.dto'
 export * from './register.dto'
+export * from './delete.dto'
+export * from './change-password.dto'
+export * from './email.dto'
+export * from './update.dto'

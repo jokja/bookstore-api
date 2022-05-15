@@ -1,12 +1,9 @@
 import { ForbiddenException, HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AuthDto, RegisterDto } from './dto';
+import { AuthDto, RegisterDto, EmailDto, ChangePasswordDto, UpdateDto, DeleteDto } from './dto';
 import * as bcrypt from 'bcrypt'
 import { MyProfile, Tokens, User } from './types';
 import { JwtService } from '@nestjs/jwt'
-import { EmailDto } from './dto/email.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { UpdateDto } from './dto/update.dto';
 
 @Injectable()
 export class AuthService {
@@ -69,6 +66,10 @@ export class AuthService {
     if (!user) throw new HttpException({
       message: 'Email tidak ditemukan di data Author',
       error_key: 'error_email_not_found'
+    }, 200)
+    if (user.Is_Disabled) throw new HttpException({
+      message: 'Akun telah dihapus',
+      error_key: 'error_account_deleted'
     }, 200)
     const passwordMatches = await bcrypt.compare(dto.Password, user.Hash)
     if (!passwordMatches) throw new HttpException({
@@ -251,7 +252,46 @@ export class AuthService {
     return
   }
 
-  delete() {}
+  async delete(dto: DeleteDto, authorId: number) {
+    const author = await this.prisma.author.findUnique({
+      where: {
+        Author_ID: authorId
+      }
+    })
+    if(!author) {
+      throw new HttpException({
+        message: 'Author ID tidak di temukan',
+        error_key: 'error_author_id_not_found'
+      }, 200)
+    }
+
+    const token = this.jwtService.decode(dto.Refresh_Token)
+    if (!token) {
+      throw new HttpException({
+        message: 'Refresh Token yang di supply tidak sesuai ketentuan / settingan token',
+        error_key: 'error_refresh_token_invalid'
+      }, 200)
+    }
+
+    if (Date.now() >= token['exp'] * 1000) {
+      throw new HttpException({
+        message: 'Refresh Token yang di supply sudah kadaluarsa',
+        error_key: 'error_refresh_token_expired'
+      }, 200)
+    }
+
+    await this.prisma.author.update({
+      where: {
+        Author_ID: authorId
+      },
+      data: {
+        Is_Disabled: true,
+        Hashed_RT: null
+      }
+    })
+
+    return
+  }
 
   async getMyProfile(authorId: number): Promise<MyProfile> {
     if (!authorId) {

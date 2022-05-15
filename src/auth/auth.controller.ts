@@ -1,11 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Post, Put } from '@nestjs/common';
 import { GetCurrentUserId, Public } from 'src/common/decorators';
 import { AuthService } from './auth.service';
-import { AuthDto } from './dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { EmailDto } from './dto/email.dto';
-import { RegisterDto } from './dto/register.dto';
-import { UpdateDto } from './dto/update.dto';
+import { AuthDto, ChangePasswordDto, DeleteDto, EmailDto, RegisterDto, UpdateDto } from './dto';
 import { Tokens } from './types';
 
 @Controller('author')
@@ -58,8 +54,11 @@ export class AuthController {
   }
 
   @Delete('delete')
-  delete() {
-    this.authSerivce.delete();
+  delete(
+    @Body() dto: DeleteDto,
+    @GetCurrentUserId() authorId: number
+  ) {
+    return this.authSerivce.delete(dto, authorId);
   }
 
   @Get('get_my_profile')
