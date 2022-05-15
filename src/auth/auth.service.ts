@@ -6,6 +6,7 @@ import { MyProfile, Tokens, User } from './types';
 import { JwtService } from '@nestjs/jwt'
 import { EmailDto } from './dto/email.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateDto } from './dto/update.dto';
 
 @Injectable()
 export class AuthService {
@@ -224,7 +225,31 @@ export class AuthService {
     return tokens
   }
 
-  update() {}
+  async update(dto: UpdateDto, authorId: number) {
+    const author = await this.prisma.author.findUnique({
+      where: {
+        Author_ID: authorId
+      }
+    })
+    if(!author) {
+      throw new HttpException({
+        message: 'Author ID tidak di temukan',
+        error_key: 'error_author_id_not_found'
+      }, 200)
+    }
+
+    await this.prisma.author.update({
+      where: {
+        Author_ID: authorId
+      },
+      data: {
+        Name: dto.Name,
+        Pen_Name: dto.Pen_Name
+      }
+    })
+
+    return
+  }
 
   delete() {}
 
