@@ -1,10 +1,9 @@
-import { ForbiddenException, HttpException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto, RegisterDto } from './dto';
 import * as bcrypt from 'bcrypt'
 import { Tokens, User } from './types';
 import { JwtService } from '@nestjs/jwt'
-import { PrismaClient } from '.prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -40,8 +39,8 @@ export class AuthService {
     ])
 
     return {
-      access_token: at,
-      refresh_token: rt
+      Access_Token: at,
+      Refresh_Token: rt
     }
   }
 
@@ -75,11 +74,23 @@ export class AuthService {
     }, 200)
 
     const tokens = await this.getTokens(user.Author_ID, user.Email)
-    await this.updateRtHash(user.Author_ID, tokens.refresh_token)
+    await this.updateRtHash(user.Author_ID, tokens.Refresh_Token)
     return tokens
   }
 
-  logout() {}
+  async logout(authorId: number) {
+    await this.prisma.author.updateMany({
+      where: {
+        Author_ID: authorId,
+        Hashed_RT: {
+          not: null
+        }
+      },
+      data: {
+        Hashed_RT: null
+      }
+    })
+  }
 
   forgotPassword() {}
 
@@ -105,7 +116,7 @@ export class AuthService {
       }
     })
     const tokens = await this.getTokens(newUser.Author_ID, newUser.Email)
-    await this.updateRtHash(newUser.Author_ID, tokens.refresh_token)
+    await this.updateRtHash(newUser.Author_ID, tokens.Refresh_Token)
     return {
       name: newUser.Name,
       pen_name: newUser.Pen_Name,
@@ -115,7 +126,41 @@ export class AuthService {
 
   changePassword() {}
 
-  refreshToken() {}
+  async refreshToken(refreshToken: string): Promise<Tokens> {
+    const user = this.jwtService.decode(refreshToken)
+    if (!user) {
+      throw new HttpException({
+        message: 'Refresh Token yang di supply tidak sesuai ketentuan / settingan token',
+        error_key: 'error_refresh_token_invalid'
+      }, 200)
+    }
+
+    const author = await this.prisma.author.findUnique({
+      where: {
+        Author_ID: user.sub,
+      }
+    })
+    
+    if (!author || !author.Hashed_RT) throw new HttpException({
+      message: 'Refresh Token yang di supply tidak sesuai ketentuan / settingan token',
+      error_key: 'error_refresh_token_invalid'
+    }, 200)
+
+    if (Date.now() >= user['exp'] * 1000) {
+      throw new HttpException({
+        message: 'Refresh Token yang di supply sudah kadaluarsa',
+        error_key: 'error_refresh_token_expired'
+      }, 200)
+    }
+
+    const rtMatches = await bcrypt.compare(refreshToken, author.Hashed_RT)
+    if (!rtMatches) throw new ForbiddenException('Access Denied')
+
+    const tokens = await this.getTokens(author.Author_ID, author.Email)
+    await this.updateRtHash(author.Author_ID, tokens.Refresh_Token)
+
+    return tokens
+  }
 
   update() {}
 

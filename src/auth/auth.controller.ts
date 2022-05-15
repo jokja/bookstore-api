@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, HttpCode, HttpStatus, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { GetCurrentUserId, Public } from 'src/common/decorators';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
 import { RegisterDto } from './dto/register.dto';
@@ -7,37 +8,41 @@ import { Tokens } from './types';
 @Controller('author')
 export class AuthController {
   constructor(private authSerivce: AuthService) {}
-  @Post('/login')
+
+  @Public()
+  @Post('login')
   login(@Body() dto: AuthDto): Promise<Tokens> {
     return this.authSerivce.login(dto);
   }
 
-  @Post('/logout')
-  logout() {
-    this.authSerivce.logout();
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  logout(@GetCurrentUserId() authorId: number) {
+    this.authSerivce.logout(authorId);
   }
 
-  @Post('/forgot_password')
+  @Post('forgot_password')
   forgotPassword() {
     this.authSerivce.forgotPassword();
   }
 
-  @Post('/register')
+  @Public()
+  @Post('register')
   register(@Body() dto: RegisterDto) {
     return this.authSerivce.register(dto);
   }
 
-  @Post('/change_password')
+  @Post('change_password')
   changePassword() {
     this.authSerivce.changePassword();
   }
 
-  @Post('/refresh_token')
-  refreshToken() {
-    this.authSerivce.refreshToken();
+  @Post('refresh_token')
+  refreshToken(@Body('Refresh_Token') refreshToken: string) {
+    return this.authSerivce.refreshToken(refreshToken)
   }
 
-  @Patch('/update')
+  @Patch('update')
   update() {
     this.authSerivce.update();
   }
