@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Patch, Post } from
 import { GetCurrentUserId, Public } from 'src/common/decorators';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { EmailDto } from './dto/email.dto';
 import { RegisterDto } from './dto/register.dto';
 import { Tokens } from './types';
@@ -35,8 +36,11 @@ export class AuthController {
   }
 
   @Post('change_password')
-  changePassword() {
-    this.authSerivce.changePassword();
+  changePassword(
+    @Body() dto: ChangePasswordDto,
+    @GetCurrentUserId() authorId: number
+  ) {
+    return this.authSerivce.changePassword(dto, authorId);
   }
 
   @Post('refresh_token')

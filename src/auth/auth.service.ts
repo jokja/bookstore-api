@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt'
 import { MyProfile, Tokens, User } from './types';
 import { JwtService } from '@nestjs/jwt'
 import { EmailDto } from './dto/email.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -66,12 +67,12 @@ export class AuthService {
 
     if (!user) throw new HttpException({
       message: 'Email tidak ditemukan di data Author',
-      error_key: 'error_invalid_password'
+      error_key: 'error_email_not_found'
     }, 200)
     const passwordMatches = await bcrypt.compare(dto.Password, user.Hash)
     if (!passwordMatches) throw new HttpException({
       message: 'Password tidak sesuai',
-      error_key: 'error_email_not_found'
+      error_key: 'error_invalid_password'
     }, 200)
 
     const tokens = await this.getTokens(user.Author_ID, user.Email)
@@ -154,7 +155,38 @@ export class AuthService {
     }
   }
 
-  changePassword() {}
+  async changePassword(dto: ChangePasswordDto, authorId: number) {
+    const author = await this.prisma.author.findUnique({
+      where: {
+        Author_ID: authorId
+      }
+    })
+    if(!author) {
+      throw new HttpException({
+        message: 'Author ID tidak di temukan',
+        error_key: 'error_author_id_not_found'
+      }, 200)
+    }
+
+    const passwordMatches = await bcrypt.compare(dto.Old_Password, author.Hash)
+    if (!passwordMatches) throw new HttpException({
+      message: 'Password tidak sesuai',
+      error_key: 'error_invalid_password'
+    }, 200)
+
+    const hash = await this.hashData(dto.New_Password)
+    await this.prisma.author.update({
+      where: {
+        Author_ID: authorId
+      },
+      data: {
+        Hash: hash
+      }
+    })
+    const tokens = await this.getTokens(author.Author_ID, author.Email)
+    await this.updateRtHash(author.Author_ID, tokens.Refresh_Token)
+    return
+  }
 
   async refreshToken(refreshToken: string): Promise<Tokens> {
     const user = this.jwtService.decode(refreshToken)
