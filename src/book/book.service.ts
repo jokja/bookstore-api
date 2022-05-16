@@ -1,7 +1,6 @@
 import { HttpException, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { AddBookDto } from "./dto/addBook.dto";
-import { UpdateBookDto } from "./dto/updateBook.dto";
+import { AddBookDto, UpdateBookDto } from "./dto";
 
 @Injectable()
 export class BookService {
