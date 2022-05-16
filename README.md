@@ -65,6 +65,8 @@ $ yarn test:cov
 yarn install
 ```
 2. Setting database
+setting database in `.env` file
+example `DATABASE_URL="postgresql://postgres:root@localhost:5432/bookstore?schema=public"`
 ```bash
 DATABASE_URL=YOUR DATABASE HERE
 ```
