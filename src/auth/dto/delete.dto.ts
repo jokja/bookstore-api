@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString } from "class-validator";
 
 export class DeleteDto {
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   Refresh_Token: string;
 }

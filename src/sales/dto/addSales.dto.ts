@@ -1,20 +1,20 @@
 import { IsEmail, IsInt, IsNotEmpty, IsString } from "class-validator"
 
 export class AddSalesDto {
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   Name: string
 
-  @IsNotEmpty()
   @IsString()
   @IsEmail()
+  @IsNotEmpty()
   Email: string
 
-  @IsNotEmpty()
   @IsInt()
+  @IsNotEmpty()
   Quantity: number
 
-  @IsNotEmpty()
   @IsInt()
+  @IsNotEmpty()
   Book_ID: number
 }

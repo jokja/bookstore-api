@@ -1,4 +1,5 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException } from '@nestjs/common';
+import { isArray } from 'class-validator';
 import { Request, Response } from 'express';
 
 @Catch(HttpException)
@@ -15,7 +16,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       .json({
         message: 'Failed',
         error_key: message['error_key'],
-        error_message: message['message'],
+        error_message: isArray(message['message']) ? message['message'][0] : message['message'],
         error_data: {}
         // statusCode: status,
         // timestamp: new Date().toISOString(),

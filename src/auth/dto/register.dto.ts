@@ -5,16 +5,16 @@ export class RegisterDto {
   @IsString()
   Name: string;
 
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   Pen_name: string;
 
-  @IsNotEmpty()
   @IsString()
   @IsEmail()
+  @IsNotEmpty()
   Email: string;
 
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   Password: string;
 }

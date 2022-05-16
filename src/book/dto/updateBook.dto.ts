@@ -1,19 +1,19 @@
 import { IsInt, IsNotEmpty, IsString } from "class-validator";
 
 export class UpdateBookDto {
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   Title: string
 
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   Summary: string
 
-  @IsNotEmpty()
   @IsInt()
+  @IsNotEmpty()
   Price: number
 
-  @IsNotEmpty()
   @IsInt()
+  @IsNotEmpty()
   Stock: number
 }
