@@ -6,9 +6,10 @@ import { PrismaModule } from './prisma/prisma.module';
 import { BookModule } from './book/book.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './common/guards';
+import { SalesModule } from './sales/sales.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, BookModule],
+  imports: [AuthModule, PrismaModule, BookModule, SalesModule],
   // controllers: [AppController],
   providers: [
     {
