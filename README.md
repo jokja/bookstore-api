@@ -58,13 +58,22 @@ $ yarn test:e2e
 $ yarn test:cov
 ```
 
-## Setting Database URL
+## Step Instalasi
+1. Install dependencies
+```bash
+# run command inside application folder
+yarn install
+```
+2. Setting database
 ```bash
 DATABASE_URL=YOUR DATABASE HERE
 ```
-
-## Migrate Database
+3. Setting port di file `src/main.ts`
 ```bash
-# run on command prompt/terminal
+app.listen(3100);
+```
+4. Migrate Database
+```bash
+# run command
 npx prisma db push
 ```
