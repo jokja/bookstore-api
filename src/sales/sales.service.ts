@@ -1,4 +1,5 @@
 import { HttpException, Injectable } from "@nestjs/common";
+import { addHours, format, subHours } from "date-fns";
 import { PrismaService } from "src/prisma/prisma.service";
 import { AddSalesDto } from "./dto";
 
@@ -67,8 +68,19 @@ export class SalesService {
     createdStart: string,
     createdEnd: string
   ) {
-    const start = new Date(parseInt(createdStart) * 1000)
-    const end = new Date(parseInt(createdEnd) * 1000)
+    let startFormat = format(new Date(), 'yyyy-MM-dd 00:00:00')
+    let endFormat = format(new Date(), 'yyyy-MM-dd 23:59:00')
+
+    if (createdStart) {
+      const start = addHours(new Date(parseInt(createdStart) * 1000), 7)
+      startFormat = format(new Date(start), 'yyyy-MM-dd 00:00:00')
+    }
+
+    if (createdEnd) {
+      const end = addHours(new Date(parseInt(createdEnd) * 1000), 7)
+      endFormat = format(new Date(end), 'yyyy-MM-dd 23:59:00')
+    }
+
     const results = await this.prisma.$transaction([
       this.prisma.sales.findMany({
         skip: (page - 1) * limit,
@@ -78,8 +90,8 @@ export class SalesService {
             contains: title,
           },
           Created_Time: {
-            gte:  new Date(start.toISOString().split('T')[0] + ' 00:00:00'),
-            lte:  new Date(end.toISOString().split('T')[0] + ' 23:59:00')
+            gte: createdStart ? new Date(startFormat) : undefined,
+            lte: createdEnd ? new Date(endFormat) : undefined
           },
         },
       }),
@@ -89,8 +101,8 @@ export class SalesService {
             contains: title
           },
           Created_Time: {
-            gte:  new Date(start.toISOString().split('T')[0] + ' 00:00:00'),
-            lte:  new Date(end.toISOString().split('T')[0] + ' 23:59:00')
+            gte: createdStart ? new Date(startFormat) : undefined,
+            lte: createdEnd ? new Date(endFormat) : undefined
           },
         }
       })

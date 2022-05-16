@@ -77,13 +77,17 @@ export class BookService {
           }
         },
         where: {
-          Title: title,
+          Title: {
+            contains: title
+          },
           Author_ID: authorId
         },
       }),
       this.prisma.book.count({
         where: {
-          Title: title,
+          Title: {
+            contains: title
+          },
           Author_ID: authorId
         }
       })
