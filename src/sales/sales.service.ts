@@ -44,4 +44,70 @@ export class SalesService {
     }
     return
   }
+
+  async getSales(salesId: number) {
+    const result = await this.prisma.sales.findUnique({
+      where: {
+        Sales_ID: salesId
+      }
+    })
+    if(!result) {
+      throw new HttpException({
+        message: 'Error ID yang di supply tidak ada di database',
+        error_key: 'error_id_not_found'
+      }, 200)
+    }
+    return result
+  }
+
+  async getMySales(
+    page: number,
+    limit: number,
+    title: string,
+    createdStart: string,
+    createdEnd: string
+  ) {
+    const start = new Date(parseInt(createdStart) * 1000)
+    const end = new Date(parseInt(createdEnd) * 1000)
+    const results = await this.prisma.$transaction([
+      this.prisma.sales.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+        where: {
+          Book_Title: {
+            contains: title,
+          },
+          Created_Time: {
+            gte:  new Date(start.toISOString().split('T')[0] + ' 00:00:00'),
+            lte:  new Date(end.toISOString().split('T')[0] + ' 23:59:00')
+          },
+        },
+      }),
+      this.prisma.sales.count({
+        where: {
+          Book_Title: {
+            contains: title
+          },
+          Created_Time: {
+            gte:  new Date(start.toISOString().split('T')[0] + ' 00:00:00'),
+            lte:  new Date(end.toISOString().split('T')[0] + ' 23:59:00')
+          },
+        }
+      })
+    ])
+
+    const totalAllData = results[1]
+    const maxPage = Math.ceil(totalAllData / limit)
+
+    const data = {
+      List_Data: results[0],
+      Pagination_Data: {
+        Current_Page: page,
+        Max_Data_Per_Page: limit,
+        Max_Page: maxPage,
+        Total_All_Data: totalAllData
+      }
+    }
+    return data
+  }
 }
