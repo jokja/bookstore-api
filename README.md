@@ -77,3 +77,8 @@ app.listen(3100);
 # run command
 npx prisma db push
 ```
+5. Run application
+```bash
+# run command
+yarn start:dev
+```
